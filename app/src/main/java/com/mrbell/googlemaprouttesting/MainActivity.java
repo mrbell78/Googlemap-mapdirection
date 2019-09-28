@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Gpsroutin gpsroutin;
 
 
+    private static final String TAG = "MainActivity";
     SupportMapFragment mapFragment;
     Marker oldMarker,newMarker;
     CameraUpdate cameraUpdate;
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     ArrayList<HashMap<String,Double>> arraySteps=new ArrayList<>();
 
     String url ="https://maps.googleapis.com/map/api/place/textsearch/json?" + "key=AIzaSyBgZTnamFOQng2HZSQKqxIRhmeCmyD5qAI" +"&query=";
-    String url2="https://maps.googleapis.com/map/api/place/textsearch/json?"+"key=AIzaSyBgZTnamFOQng2HZSQKqxIRhmeCmyD5qAI";
+    String url2="http://maps.googleapis.com/maps/api/directions/json?"+"key=AIzaSyBgZTnamFOQng2HZSQKqxIRhmeCmyD5qAI";
 
 
     String MODE_DRIVIES="driving";
@@ -95,9 +97,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         btn_uttara.setOnClickListener(this);
         btn_wari.setOnClickListener(this);
         fab.setOnClickListener(this);
-
-
-
         mapFragment= (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         mapFragment.getMapAsync(this);
 
@@ -113,7 +112,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 getThisDevicelocation();
                 break;
             case R.id.btn_mirpur:
-                desirelocatoin(" North+Tower+Uttara+Dhaka");
+
+                LatLng latLng = new LatLng(23.8047339,90.3614061);
+                gMap.addMarker(new MarkerOptions().position(latLng).title("babuland"));
+                gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));
+                break;
+            case R.id.btn_uttara:
+                LatLng uttara = new LatLng(23.8742693,90.397924);
+                gMap.addMarker(new MarkerOptions().position(uttara).title("babuland"));
+                gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(uttara,18));
+                break;
+            case R.id.btn_wari:
+                LatLng wari = new LatLng(23.7195281,90.397924);
+                gMap.addMarker(new MarkerOptions().position(wari).title("babuland"));
+                gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(wari,18));
+                break;
+            default:
+                firsttimeshow=0;
+                getThisDevicelocation();
         }
     }
 
@@ -143,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     JSONObject  geometri = info.getJSONObject("geometry");
                     JSONObject  location = geometri.getJSONObject("location");
 
-                    lat=location.getString("lat");
+                   lat=location.getString("lat");
                     lng=location.getString("lng");
                     HashMap<String,String> hm =new HashMap<>();
 
@@ -159,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }catch (JSONException e){
                  e.printStackTrace();
+                Log.d(TAG, "onResponse: -------------------print stack tree--------------------------------------------"+e.getMessage());
 
             }
         }
@@ -186,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             urlQuery=url2+"orgin=" + String.valueOf(mlocation.getLatitude()+",")+String.valueOf(mlocation.getLongitude())+"mode="+MODE_DRIVIES+
                     "&"+"destination=place_id:"+arraylocation.get(i).get("place_id");
+
 
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(urlQuery,null,jsonObjectDirectionListener,jsonObjectErrorlisener);
 
@@ -243,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }catch (JSONException e){
 
                 e.printStackTrace();
-                Toast.makeText(getBaseContext(), "error: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), "error is occured: "+e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -284,6 +302,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(MainActivity.this);
 
         fusedLocationProviderClient.requestLocationUpdates(gpsroutin.getmLocationreq(),locationCallback, Looper.myLooper());
+
+       /*  LatLng latLng = new LatLng(23.8047864,90.3624875);
+        gMap.addMarker(new MarkerOptions().position(latLng).title("babuland"));
+        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));*/
     }
 
     LocationCallback locationCallback= new LocationCallback(){
@@ -312,6 +334,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         public void onErrorResponse(VolleyError error) {
 
             Toast.makeText(getBaseContext(), "Error: "+ error.getMessage(), Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "onErrorResponse: ---------------------------------------------reason of error--------------------"+error.getMessage());
         }
     };
 }
